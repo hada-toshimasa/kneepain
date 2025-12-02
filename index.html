@@ -55,7 +55,8 @@
 </div>
 
 <script>
-const poolPart1 = [
+// 膝痛マニュアル準拠のデータプール
+const pool = [
 {q:"50代男性のMRI研究で無症状でも半月板損傷が見つかる割合は？",o:["10%","19%","32%","50%"],c:2,r:"50代男性の32%、女性の19%に無症状でも半月板損傷所見あり。",source:"3ページ"},
 {q:"70歳以上の男女で半月板損傷が見つかる割合は？",o:["10%以下","約30%","過半数","ほぼ全員"],c:2,r:"70歳以上では過半数に半月板損傷が認められる。",source:"3ページ"},
 {q:"中高年の膝画像診断において、ほぼ全員に見られる所見は？",o:["骨折","軟骨の摩耗","半月板断裂","靭帯断裂"],c:1,r:"中高年では軟骨の摩耗はほぼ全員に見られる。",source:"3ページ"},
@@ -80,7 +81,7 @@ const poolPart1 = [
 {q:"「階段の降り」で痛い場合に疑う関節障害は？",o:["膝蓋大腿関節(PF)","脛骨大腿関節(FT)","股関節","仙腸関節"],c:0,r:"降りは膝の可動範囲が大きく、PF関節障害が疑われることが多い。",source:"23ページ"},
 {q:"「長く歩くと痛い」場合に疑う関節障害は？",o:["膝蓋大腿関節","脛骨大腿関節","足関節","股関節"],c:1,r:"平地歩行での荷重痛は脛骨大腿関節の問題を疑う。",source:"23ページ"},
 {q:"痛む範囲が「狭い（指でさせる）」場合に疑う組織は？",o:["神経","筋膜","半月板・脂肪体・腱","筋肉全体"],c:2,r:"局所的な痛みは腱、脂肪体、半月板などが考えられる。",source:"25ページ"},
-{q:"膝蓋下脂肪体の評価「屈曲伸展圧痛テスト」で陽性と判断するのは？",o:["屈曲で痛み増強","伸展で痛み増強","伸展で圧痛あり、屈曲で消失・減少","変化なし"],c:2,r:"屈曲で脂肪体が奥に逃げて圧痛が減れば脂肪体由来。",source:"30ページ"},
+{q:"膝蓋下脂肪体の評価「屈曲伸展圧痛テスト」で陽性と判断するのは？",o:["屈曲で痛み増強","伸展で痛み増強","伸展で圧痛あり、屈曲で消失・減少","変化なし"],c:2,r:"伸展で圧痛があり、屈曲で脂肪体が奥に滑り込むことで圧痛が減少すれば脂肪体由来と判断する。",source:"30ページ"},
 {q:"膝蓋下脂肪体の柔軟性改善手技の方向は？",o:["上下","回旋","内側⇔外側","圧迫のみ"],c:2,r:"硬い部分を内側～外側～内側へと移動させる。",source:"33ページ"},
 {q:"膝蓋下脂肪体炎の原因となる「膝蓋骨の位置異常」は？",o:["高位","低位","外方偏位","回旋"],c:1,r:"膝蓋骨低位は脂肪体の動きを阻害し線維化を助長する。",source:"31ページ"},
 {q:"リバーススクリューエクササイズの手技で、下腿をどう誘導するか？",o:["外旋","内旋","外反","内反"],c:1,r:"大腿を外旋、下腿を「内旋」させて過外旋を修正する。",source:"33ページ"},
@@ -230,7 +231,6 @@ const poolPart1 = [
 {q:"半膜様筋痛の原因となる足部アライメントは？",o:["扁平足","ハイアーチ","内反足","尖足"],c:0,r:"扁平足（アーチ低下）を伴う高齢者に多発する。",source:"59ページ"}
 ];
 
-// シャッフル関数
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -244,7 +244,6 @@ let currentIndex = 0;
 let score = 0;
 const QUESTIONS_PER_ROUND = 30;
 
-// DOM要素
 const startScreen = document.getElementById('start-screen');
 const quizScreen = document.getElementById('quiz-screen');
 const resultScreen = document.getElementById('result-screen');
@@ -255,18 +254,15 @@ const nextBtn = document.getElementById('next-btn');
 const progress = document.getElementById('progress');
 const scoreDisplay = document.getElementById('score');
 
-// プール数を表示
 document.getElementById('pool-count').textContent = pool.length;
 
 function startQuiz() {
     currentSet = shuffle([...pool]).slice(0, QUESTIONS_PER_ROUND);
     currentIndex = 0;
     score = 0;
-    
     startScreen.style.display = 'none';
     resultScreen.style.display = 'none';
     quizScreen.style.display = 'block';
-    
     showQuestion();
 }
 
@@ -302,17 +298,16 @@ function checkAnswer(choiceIndex, btn, q) {
     
     const opts = document.querySelectorAll('.option-btn');
     const isCorrect = (choiceIndex === q.c);
-    const sourceText = q.source ? `<span class="source">参照：${q.source}</span>` : "";
-
+    
     if (isCorrect) {
         btn.classList.add('correct');
-        feedbackBox.innerHTML = `<strong>正解！</strong><br>${q.r}${sourceText}`;
+        feedbackBox.innerHTML = `<strong>正解！</strong><br>${q.r}<span class="source">参照：${q.source || 'マニュアル'}</span>`;
         feedbackBox.className = 'feedback';
         score++;
     } else {
         btn.classList.add('incorrect');
         opts[q.c].classList.add('correct');
-        feedbackBox.innerHTML = `<strong>不正解...</strong><br>正解は「${q.o[q.c]}」です。<br>${q.r}${sourceText}`;
+        feedbackBox.innerHTML = `<strong>不正解...</strong><br>正解は「${q.o[q.c]}」です。<br>${q.r}<span class="source">参照：${q.source || 'マニュアル'}</span>`;
         feedbackBox.className = 'feedback error';
     }
     
@@ -333,7 +328,6 @@ function nextQuestion() {
 function showResult() {
     quizScreen.style.display = 'none';
     resultScreen.style.display = 'block';
-    
     const finalScore = document.getElementById('final-score');
     const comment = document.getElementById('comment');
     
@@ -341,7 +335,7 @@ function showResult() {
     const percent = (score / QUESTIONS_PER_ROUND) * 100;
 
     if (percent === 100) {
-        comment.textContent = "完璧です！膝痛治療の知識はマスターしています。";
+        comment.textContent = "素晴らしい！膝痛治療の知識は完璧です。";
         comment.style.color = "#27ae60";
     } else if (percent >= 80) {
         comment.textContent = "合格レベルです！臨床で十分使える知識があります。";
